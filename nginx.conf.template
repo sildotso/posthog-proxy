@@ -1,0 +1,26 @@
+worker_processes auto;
+
+events { worker_connections 1024; }
+
+http {
+    sendfile on;
+
+    server {
+        keepalive_timeout   70;
+
+        server_name ${SERVER_NAME};
+
+        listen ${PORT};
+
+        location / {
+            proxy_set_header      X-Real-IP                     $remote_addr;
+            proxy_set_header      X-Forwarded-For               $proxy_add_x_forwarded_for;
+            proxy_set_header      X-Forwarded-Host              $server_name;
+            proxy_set_header      X-Forwarded-Proto             $scheme;
+            proxy_set_header      Host                          app.posthog.com;
+            proxy_redirect        off;
+            proxy_ssl_server_name on;
+            proxy_pass            https://app.posthog.com;
+        }
+    }
+}
